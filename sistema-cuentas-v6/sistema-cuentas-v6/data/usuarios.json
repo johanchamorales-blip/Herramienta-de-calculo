@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "usuario": "Johan",
+    "email": "johanchamorales123@gmail.com",
+    "rol": "ADMINISTRADOR",
+    "hash_password": "cbb6c7870f6d8c16393eb34fc0444c47dd4859036a1906ab04db2febe3e02982",
+    "salt": "f596ce7bf2021b462358f49f03745d56",
+    "activo": true,
+    "fecha_creacion": "2026-09-15T14:57:07.9822773Z",
+    "ultimo_acceso": "2026-09-15T15:23:30.659779Z"
+  },
+  {
+    "id": 2,
+    "usuario": "joahn",
+    "email": "johanchamorales@gmail.com",
+    "rol": "CONTADOR",
+    "hash_password": "df7ab184acd13eb9c91f4b69da81e5334aacf8cd8afb6bc8ae841ce90d16dd47",
+    "salt": "6dea91018410fa9f052fdbc7a494cc2e",
+    "activo": true,
+    "fecha_creacion": "2026-09-15T16:21:47.6378318Z",
+    "ultimo_acceso": "2026-09-15T16:22:16.340572Z"
+  }
+]

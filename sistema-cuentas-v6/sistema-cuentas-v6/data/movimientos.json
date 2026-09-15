@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "cuenta_id": 1,
+    "tipo": "INGRESO",
+    "fecha_registro": "2026-09-15T15:55:40.60497Z",
+    "fecha_operacion": "2026-09-15",
+    "fecha_emision_cheque": "",
+    "fecha_cobro": "",
+    "numero_documento": "66548658",
+    "remitente": "Eduardo",
+    "concepto": "Pago Planillas",
+    "monto": 50000,
+    "estado": "ACTIVO",
+    "saldo_inicial": 500000,
+    "saldo_actual": 550000,
+    "usuario": "Johan",
+    "fecha_anulacion": "0001-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "cuenta_id": 1,
+    "tipo": "INGRESO",
+    "fecha_registro": "2026-09-15T16:02:55.7871977Z",
+    "fecha_operacion": "2026-09-15",
+    "fecha_emision_cheque": "",
+    "fecha_cobro": "",
+    "numero_documento": "123456789",
+    "remitente": "Eduardo",
+    "concepto": "Pago Planillas",
+    "monto": 50000,
+    "estado": "ACTIVO",
+    "saldo_inicial": 550000,
+    "saldo_actual": 600000,
+    "usuario": "Johan",
+    "fecha_anulacion": "0001-01-01T00:00:00Z"
+  }
+]

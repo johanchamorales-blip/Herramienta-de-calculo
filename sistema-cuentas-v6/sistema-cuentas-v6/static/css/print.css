@@ -1,0 +1,38 @@
+/* El libro de bancos y la conciliación se imprimen como documento formal:
+   papel blanco, tinta negra, encabezado de la cooperativa y firmas. */
+.documento { display: none; }
+
+@media print {
+  @page { size: letter landscape; margin: 14mm; }
+
+  body { background: #fff; color: #000; font-family: var(--fuente-doc); }
+  .lateral, .barra-pestanas, .contexto, .notificaciones, .acciones, .filtros, .paginacion, .velo { display: none !important; }
+  .aplicacion { display: block; height: auto; }
+  .trabajo { display: block; }
+  .lienzo { overflow: visible; padding: 0; }
+  .tarjeta { border: none; background: none; padding: 0; }
+  .tabla-marco { border: none; max-height: none; overflow: visible; }
+
+  .documento { display: block; margin-bottom: 10mm; text-align: center; }
+  .documento h1 { font-size: 16pt; letter-spacing: 0.5px; }
+  .documento p { margin: 2px auto; font-size: 10pt; max-width: none; }
+
+  table { font-size: 9pt; }
+  th, td { border: 1px solid #333; padding: 4px 6px; color: #000; }
+  th { background: #eee !important; color: #000; position: static; }
+  tbody tr:hover { background: none; }
+  .deposito, .cheque, .negativo { color: #000; }
+  .etiqueta { border: none; color: #000; }
+
+  .firmas {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10mm;
+    margin-top: 18mm;
+    text-align: center;
+    font-size: 9pt;
+  }
+  .firmas div { border-top: 1px solid #000; padding-top: 4px; }
+}
+
+.firmas { display: none; }

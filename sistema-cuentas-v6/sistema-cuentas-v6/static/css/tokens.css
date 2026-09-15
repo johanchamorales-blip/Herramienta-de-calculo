@@ -1,0 +1,37 @@
+/* Tokens del sistema: un solo lugar para color, tipografía y espacio. */
+:root {
+  color-scheme: dark;
+
+  /* Tinta y papel invertidos: azul de libro contable, no negro puro. */
+  --tinta: #0c1622;
+  --panel: #13202e;
+  --panel-alto: #1a2b3c;
+  --panel-suave: #17283a;
+  --linea: #254058;
+  --linea-suave: #1e3348;
+
+  --texto: #e9f0f6;
+  --texto-medio: #b3c4d4;
+  --texto-tenue: #8095ab;
+
+  /* Jade para acciones, ámbar para lo pendiente de revisión. */
+  --jade: #2e9e7e;
+  --jade-alto: #37b590;
+  --jade-tenue: rgba(46, 158, 126, 0.16);
+  --ambar: #d9a441;
+  --ambar-tenue: rgba(217, 164, 65, 0.15);
+
+  /* Columnas del libro: depósitos en verde, cheques en rojo. */
+  --deposito: #57bd93;
+  --cheque: #e0736b;
+  --cheque-tenue: rgba(224, 115, 107, 0.14);
+
+  --fuente-ui: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --fuente-doc: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --fuente-cifra: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+
+  --radio: 10px;
+  --radio-chico: 6px;
+  --sidebar: 236px;
+  --transicion: 140ms ease;
+}

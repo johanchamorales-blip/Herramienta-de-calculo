@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "nombre": "Micoope",
+    "direccion": "Zona 3 Coban A.V",
+    "nit": "123456-0",
+    "telefono": "59994210"
+  },
+  {
+    "id": 2,
+    "nombre": "Chicoj",
+    "direccion": "Zona 4 Coban A.V",
+    "nit": "1560315-6",
+    "telefono": "59994210"
+  }
+]

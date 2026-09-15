@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "cuenta_id": 1,
+    "mes": 9,
+    "anio": 2026,
+    "saldo_libros": 600000,
+    "saldo_libros_ajustado": 599810,
+    "saldo_estado_cuenta": 100000,
+    "cheques_circulacion": 0,
+    "depositos_en_transito": 0,
+    "notas_debito": 506,
+    "notas_credito": 266,
+    "ajustes": 50,
+    "subtotal_banco": 100000,
+    "saldo_conciliado": 100000,
+    "diferencia_con_libros": 499810,
+    "fecha_lugar": "2026-09-15",
+    "usuario": "Johan",
+    "fecha_creacion": "2026-09-15T16:14:00.543141Z"
+  }
+]

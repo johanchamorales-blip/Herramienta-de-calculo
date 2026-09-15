@@ -1,0 +1,118 @@
+[
+  {
+    "id": 1,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-15T14:57:08.038813Z",
+    "accion": "CREÓ USUARIO",
+    "documento_afectado": "Johan",
+    "detalle": "Rol Administrador"
+  },
+  {
+    "id": 2,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-15T14:57:13.6842532Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 3,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T15:01:44.0121622Z",
+    "accion": "CREÓ BANCO",
+    "documento_afectado": "Banrural"
+  },
+  {
+    "id": 4,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T15:01:52.2650837Z",
+    "accion": "CREÓ BANCO",
+    "documento_afectado": "Banco Industrial"
+  },
+  {
+    "id": 5,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T15:02:01.3583615Z",
+    "accion": "CREÓ BANCO",
+    "documento_afectado": "Bantrab"
+  },
+  {
+    "id": 6,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-15T15:23:30.6608746Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "Johan"
+  },
+  {
+    "id": 7,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T15:29:22.8886219Z",
+    "accion": "CREÓ COOPERATIVA",
+    "documento_afectado": "Micoope",
+    "detalle": "NIT 123456-0"
+  },
+  {
+    "id": 8,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T15:51:28.9858857Z",
+    "accion": "CREÓ COOPERATIVA",
+    "documento_afectado": "Chicoj",
+    "detalle": "NIT 1560315-6"
+  },
+  {
+    "id": 9,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T15:54:31.9494328Z",
+    "accion": "CREÓ CUENTA",
+    "documento_afectado": "Cuenta 6546654586",
+    "detalle": "Cooperativa Cobán"
+  },
+  {
+    "id": 10,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T15:55:40.6145433Z",
+    "accion": "REGISTRÓ INGRESO",
+    "documento_afectado": "ingreso 66548658 de la cuenta 6546654586",
+    "detalle": "Q 50000.00 · Pago Planillas"
+  },
+  {
+    "id": 11,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T16:02:55.7893873Z",
+    "accion": "REGISTRÓ INGRESO",
+    "documento_afectado": "ingreso 123456789 de la cuenta 6546654586",
+    "detalle": "Q 50000.00 · Pago Planillas"
+  },
+  {
+    "id": 12,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T16:14:00.5470172Z",
+    "accion": "GUARDÓ CONCILIACIÓN",
+    "documento_afectado": "Cuenta 6546654586",
+    "detalle": "Cuenta 1 · 2026-09 · diferencia Q 499810.00"
+  },
+  {
+    "id": 13,
+    "usuario": "Johan",
+    "rol": "ADMINISTRADOR",
+    "fecha_hora": "2026-09-15T16:21:47.6749456Z",
+    "accion": "CREÓ USUARIO",
+    "documento_afectado": "joahn",
+    "detalle": "Rol Contador"
+  },
+  {
+    "id": 14,
+    "usuario": "sistema",
+    "fecha_hora": "2026-09-15T16:22:16.3415859Z",
+    "accion": "INICIÓ SESIÓN",
+    "documento_afectado": "joahn"
+  }
+]

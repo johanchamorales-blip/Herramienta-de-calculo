@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "banco_id": 1,
+    "cooperativa_id": 1,
+    "nombre": "Cooperativa Cobán",
+    "numero": "6546654586",
+    "tipo": "MONETARIA",
+    "saldo_inicial": 500000,
+    "saldo_actual": 600000
+  }
+]

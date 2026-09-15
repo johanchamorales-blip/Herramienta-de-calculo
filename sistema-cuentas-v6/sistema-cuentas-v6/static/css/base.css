@@ -1,0 +1,100 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--tinta);
+  color: var(--texto);
+  font-family: var(--fuente-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; line-height: 1.25; }
+h1 { font-size: 22px; }
+h2 { font-size: 17px; }
+h3 { font-size: 15px; }
+p { margin: 0 0 12px; max-width: 70ch; }
+
+a { color: var(--jade-alto); }
+
+:focus-visible {
+  outline: 2px solid var(--jade-alto);
+  outline-offset: 2px;
+}
+
+/* Cifras siempre alineadas: mismo ancho por dígito. */
+.cifra, td.cifra, .metrica strong {
+  font-family: var(--fuente-cifra);
+  font-variant-numeric: tabular-nums;
+}
+
+.deposito { color: var(--deposito); }
+.cheque { color: var(--cheque); }
+.negativo { color: var(--cheque); }
+.tenue { color: var(--texto-tenue); }
+.oculto { display: none !important; }
+
+input, select, textarea, button { font: inherit; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: var(--radio-chico);
+  border: 1px solid var(--linea);
+  background: #0e1b28;
+  color: var(--texto);
+  transition: border-color var(--transicion);
+}
+input:focus, select:focus, textarea:focus { border-color: var(--jade); }
+input::placeholder, textarea::placeholder { color: #61778e; }
+textarea { resize: vertical; min-height: 68px; }
+
+label {
+  display: grid;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--texto-medio);
+}
+
+button {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: var(--radio-chico);
+  padding: 9px 15px;
+  background: var(--jade);
+  color: #04130e;
+  font-weight: 600;
+  transition: background var(--transicion), border-color var(--transicion);
+}
+button:hover:not(:disabled) { background: var(--jade-alto); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+button.secundario {
+  background: transparent;
+  border-color: var(--linea);
+  color: var(--texto-medio);
+}
+button.secundario:hover:not(:disabled) { background: var(--panel-alto); color: var(--texto); }
+
+button.peligro {
+  background: transparent;
+  border-color: rgba(224, 115, 107, 0.5);
+  color: var(--cheque);
+}
+button.peligro:hover:not(:disabled) { background: var(--cheque-tenue); }
+
+button.enlace {
+  background: none;
+  padding: 2px 6px;
+  color: var(--texto-medio);
+  font-weight: 500;
+  font-size: 13px;
+}
+button.enlace:hover:not(:disabled) { color: var(--texto); background: var(--panel-alto); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
