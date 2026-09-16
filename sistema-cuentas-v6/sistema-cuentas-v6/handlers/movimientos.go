@@ -64,6 +64,36 @@ func listarMovimientos(w http.ResponseWriter, r *http.Request) {
 		items = filtrados
 	}
 
+	// Los filtros de días siempre usan FechaOperacion, que es la fecha contable
+	// del movimiento. FechaRegistro se conserva solo como dato de auditoría.
+	desde, err := fechaConsulta(r, "desde")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "la fecha desde no es válida")
+		return
+	}
+	hasta, err := fechaConsulta(r, "hasta")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "la fecha hasta no es válida")
+		return
+	}
+	if !desde.EsVacia() && !hasta.EsVacia() && desde.Despues(hasta) {
+		writeError(w, http.StatusBadRequest, "la fecha desde no puede ser posterior a la fecha hasta")
+		return
+	}
+	if !desde.EsVacia() || !hasta.EsVacia() {
+		filtrados := make([]models.Movimiento, 0)
+		for _, m := range items {
+			if !desde.EsVacia() && m.FechaOperacion.Antes(desde) {
+				continue
+			}
+			if !hasta.EsVacia() && m.FechaOperacion.Despues(hasta) {
+				continue
+			}
+			filtrados = append(filtrados, m)
+		}
+		items = filtrados
+	}
+
 	sort.SliceStable(items, func(i, j int) bool {
 		if items[i].FechaOperacion.Time.Equal(items[j].FechaOperacion.Time) {
 			return items[i].ID > items[j].ID
@@ -75,6 +105,14 @@ func listarMovimientos(w http.ResponseWriter, r *http.Request) {
 		items = items[:limite]
 	}
 	writeJSON(w, http.StatusOK, items)
+}
+
+func fechaConsulta(r *http.Request, nombre string) (models.Fecha, error) {
+	raw := strings.TrimSpace(r.URL.Query().Get(nombre))
+	if raw == "" {
+		return models.Fecha{}, nil
+	}
+	return models.ParsearFecha(raw)
 }
 
 func crearMovimiento(w http.ResponseWriter, r *http.Request) {
