@@ -88,9 +88,8 @@ func CrearMovimiento(
 			return ResultadoMovimiento{}, errors.New("el remitente es obligatorio en un ingreso")
 		}
 		m.Beneficiario = ""
-		if !m.FechaEmisionCheque.EsVacia() && m.FechaOperacion.Antes(m.FechaEmisionCheque) {
-			return ResultadoMovimiento{}, errors.New("la fecha del depósito no puede ser anterior a la fecha de emisión del cheque")
-		}
+		m.FechaEmisionCheque = models.Fecha{}
+		m.FechaCobro = models.Fecha{}
 		m.Estado = models.EstadoIngresoActivo
 	}
 
@@ -122,8 +121,28 @@ func CrearMovimiento(
 	return ResultadoMovimiento{Movimiento: m, Avisos: avisos}, nil
 }
 
-// MarcarChequeCobrado registra que el banco pagó el cheque. Mientras un egreso
-// siga en EMITIDO se considera cheque en circulación en la conciliación.
+// EstaEnCirculacion determina el estado real al cierre del periodo.
+// Un cheque anulado nunca está en circulación.
+// Un cheque emitido sí está en circulación.
+// Un cheque cobrado solo cuenta si el cobro ocurrió después del cierre,
+// porque al cierre todavía no había sido pagado por el banco.
+func EstaEnCirculacion(m models.Movimiento, cierre models.Fecha) bool {
+	if m.Tipo != models.TipoEgreso || m.Anulado() || m.Monto <= 0 {
+		return false
+	}
+	switch m.Estado {
+	case models.EstadoEgresoEmitido:
+		return true
+	case models.EstadoEgresoCobrado:
+		return !m.FechaCobro.EsVacia() && m.FechaCobro.Despues(cierre)
+	default:
+		return false
+	}
+}
+
+// MarcarChequeCobrado registra que el banco pagó el cheque. Hasta ese momento
+// un egreso en EMITIDO queda en circulación; cuando se cobra deja de estarlo
+// para conciliaciones cuyo cierre es posterior al cobro.
 func MarcarChequeCobrado(movimientos []models.Movimiento, id int, fechaCobro models.Fecha, now time.Time) (models.Movimiento, error) {
 	idx := indiceMovimiento(movimientos, id)
 	if idx == -1 {
