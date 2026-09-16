@@ -87,13 +87,9 @@ func GenerarLibroBancos(
 	saldo := Q(cuenta.SaldoInicial)
 	saldoInicialPeriodo := saldo
 	filas := make([]LibroBancoFila, 0)
-	var totalDepositos, totalCheques, enCirculacion float64
-	numero := 0
-
+	var totalDepositos, totalCheques float64
 	for _, m := range vigentes {
 		if filtrarPeriodo && !m.FechaOperacion.EnPeriodo(mes, anio) {
-			// Los movimientos previos al periodo arrastran el saldo inicial;
-			// los posteriores no se toman en cuenta.
 			if m.FechaOperacion.Antes(models.NuevaFecha(anio, time.Month(mes), 1)) {
 				saldo = saldoDespuesMovimiento(saldo, m)
 				saldoInicialPeriodo = saldo
@@ -103,11 +99,10 @@ func GenerarLibroBancos(
 
 		saldoInicial := saldo
 		saldo = saldoDespuesMovimiento(saldo, m)
-		numero++
 
 		fila := LibroBancoFila{
 			MovimientoID:    m.ID,
-			Numero:          numero,
+			Numero:          len(filas) + 1,
 			FechaRegistro:   m.FechaRegistro,
 			FechaOperacion:  m.FechaOperacion,
 			NumeroDocumento: m.NumeroDocumento,
@@ -125,11 +120,18 @@ func GenerarLibroBancos(
 		case models.TipoEgreso:
 			fila.Cheque = m.Monto
 			totalCheques = Suma(totalCheques, m.Monto)
-			if EstaEnCirculacion(m, cierreCirculacion) {
-				enCirculacion = Suma(enCirculacion, m.Monto)
-			}
 		}
 		filas = append(filas, fila)
+	}
+
+	// La circulación se calcula sobre TODO el historial vigente, no solo sobre
+	// las filas del mes. Esto incluye cheques emitidos en meses anteriores que
+	// todavía no han sido cobrados al cierre del periodo.
+	var enCirculacion float64
+	for _, m := range vigentes {
+		if EstaEnCirculacion(m, cierreCirculacion) {
+			enCirculacion = Suma(enCirculacion, m.Monto)
+		}
 	}
 
 	totalRegistros := len(filas)
