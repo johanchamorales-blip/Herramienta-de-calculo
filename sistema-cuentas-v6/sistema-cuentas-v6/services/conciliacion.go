@@ -20,9 +20,8 @@ type ResultadoConciliacion struct {
 //	Lado banco:  saldo del estado de cuenta + depósitos en tránsito - cheques en circulación
 //	Lado libros: saldo en libros + notas de crédito - notas de débito ± ajustes
 //
-// La versión anterior restaba las notas del lado del banco, lo que ocultaba
-// diferencias reales. Los cheques en circulación se detectan solos: son los
-// egresos que siguen en estado EMITIDO al cierre del periodo.
+// Los cheques en circulación se determinan por el estado real del cheque y su
+// fecha de cobro respecto del cierre, nunca por el simple hecho de haber sido emitidos.
 func GenerarConciliacion(
 	cuenta models.Cuenta,
 	movimientos []models.Movimiento,
@@ -63,10 +62,7 @@ func GenerarConciliacion(
 
 	for _, m := range vigentes {
 		saldoLibros = saldoDespuesMovimiento(saldoLibros, m)
-		// Un cheque cobrado después del cierre seguía en circulación al cierre.
-		enCirculacion := m.Estado == models.EstadoEgresoEmitido ||
-			(m.Estado == models.EstadoEgresoCobrado && m.FechaCobro.Despues(cierre))
-		if m.Tipo == models.TipoEgreso && enCirculacion {
+		if EstaEnCirculacion(m, cierre) {
 			cheques = append(cheques, m)
 			totalCirculacion = Suma(totalCirculacion, m.Monto)
 		}
