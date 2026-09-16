@@ -70,3 +70,22 @@ func TestConciliacionCuentaChequeCobradoDespuesDelCierre(t *testing.T) {
 		t.Fatalf("debía cuadrar: %+v", r.Reporte)
 	}
 }
+
+func TestConciliacionExcluyeChequeAnuladoOCobradoAntesDelCierre(t *testing.T) {
+	cuenta := models.Cuenta{ID: 1, SaldoInicial: 1000}
+	movimientos := []models.Movimiento{
+		{ID: 1, CuentaID: 1, Tipo: models.TipoEgreso, Monto: 75, NumeroDocumento: "200", FechaOperacion: models.NuevaFecha(2026, time.August, 5), Estado: models.EstadoEgresoAnulado, MotivoAnulacion: "Cheque cancelado", FechaAnulacion: time.Date(2026, 8, 6, 10, 0, 0, 0, time.UTC)},
+		{ID: 2, CuentaID: 1, Tipo: models.TipoEgreso, Monto: 125, NumeroDocumento: "201", FechaOperacion: models.NuevaFecha(2026, time.August, 7), Estado: models.EstadoEgresoCobrado, FechaCobro: models.NuevaFecha(2026, time.August, 20)},
+		{ID: 3, CuentaID: 1, Tipo: models.TipoEgreso, Monto: 150, NumeroDocumento: "202", FechaOperacion: models.NuevaFecha(2026, time.August, 25), Estado: models.EstadoEgresoEmitido},
+	}
+	r, err := GenerarConciliacion(cuenta, movimientos, 8, 2026, 1000, 0, 0, 0, 0, "", "", "ana", time.Date(2026, 8, 31, 12, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Reporte.ChequesCirculacion != 150 {
+		t.Fatalf("solo el cheque emitido debía quedar en circulación: %v", r.Reporte.ChequesCirculacion)
+	}
+	if len(r.Cheques) != 1 || r.Cheques[0].NumeroDocumento != "202" {
+		t.Fatalf("cheques en circulación incorrectos: %+v", r.Cheques)
+	}
+}
