@@ -79,6 +79,10 @@ func GenerarLibroBancos(
 	OrdenarCronologico(vigentes)
 
 	filtrarPeriodo := mes >= 1 && mes <= 12 && anio > 0
+	cierreCirculacion := models.FechaDesde(time.Now().UTC())
+	if filtrarPeriodo {
+		cierreCirculacion = models.FechaDesde(models.NuevaFecha(anio, time.Month(mes), 1).Time.AddDate(0, 1, -1))
+	}
 
 	saldo := Q(cuenta.SaldoInicial)
 	saldoInicialPeriodo := saldo
@@ -121,7 +125,7 @@ func GenerarLibroBancos(
 		case models.TipoEgreso:
 			fila.Cheque = m.Monto
 			totalCheques = Suma(totalCheques, m.Monto)
-			if EstaEnCirculacion(m, models.NuevaFecha(anio, time.Month(mes), 1).Time.AddDate(0, 1, -1)) {
+			if EstaEnCirculacion(m, cierreCirculacion) {
 				enCirculacion = Suma(enCirculacion, m.Monto)
 			}
 		}
