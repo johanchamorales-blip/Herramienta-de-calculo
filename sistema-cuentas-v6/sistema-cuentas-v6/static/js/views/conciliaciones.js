@@ -4,197 +4,34 @@ import { escapar, datosFormulario, opcionesMes } from '../core/dom.js';
 import { dinero, fecha, periodo } from '../core/formato.js';
 import { exito, problema, pendiente } from '../core/notificaciones.js';
 
-// Conciliación bancaria: se calcula primero y solo se guarda si el usuario
-// acepta el resultado. El lado del banco y el de los libros se muestran por
-// separado para que la diferencia sea evidente.
 export class Conciliaciones extends Vista {
-  static titulo = 'Conciliación bancaria';
-  static glifo = '⇌';
-  static necesitaCuenta = true;
-
-  constructor(contexto) {
-    super(contexto);
-    this.calculo = null;
-  }
-
-  plantilla() {
-    const ahora = new Date();
-    const mesAnterior = ahora.getMonth() === 0 ? 12 : ahora.getMonth();
-    const anio = ahora.getMonth() === 0 ? ahora.getFullYear() - 1 : ahora.getFullYear();
-    return `
-      ${this.encabezado('Conciliación bancaria', 'Los cheques emitidos sin cobrar se detectan solos como cheques en circulación.', `
-        <button type="button" class="secundario" data-accion="imprimir">Imprimir</button>`)}
-
-      <div class="tarjeta">
-        <h2>Datos del estado de cuenta</h2>
-        <form class="formulario" data-formulario="conciliacion" style="margin-top:14px">
-          <div class="par">
-            <label>Mes<select name="mes">${opcionesMes(mesAnterior)}</select></label>
-            <label>Año<input name="anio" type="number" min="2000" max="2100" value="${anio}" required></label>
-          </div>
-          <div class="par">
-            <label>Saldo según estado de cuenta<input name="saldo_estado_cuenta" type="number" step="0.01" required placeholder="0.00"></label>
-            <label>Depósitos en tránsito<input name="depositos_en_transito" type="number" step="0.01" min="0" value="0"></label>
-          </div>
-          <div class="par">
-            <label>Notas de débito<input name="notas_debito" type="number" step="0.01" min="0" value="0"></label>
-            <label>Notas de crédito<input name="notas_credito" type="number" step="0.01" min="0" value="0"></label>
-          </div>
-          <div class="par">
-            <label>Otros ajustes (+/−)<input name="ajustes" type="number" step="0.01" value="0"></label>
-            <label>Fecha y lugar<input name="fecha_lugar" placeholder="Guatemala, 31/08/2026"></label>
-          </div>
-          <label class="ancho-total">Observaciones<textarea name="observaciones" rows="2" placeholder="Notas para la comisión de vigilancia"></textarea></label>
-          <div class="acciones">
-            <button type="submit">Calcular conciliación</button>
-            <button type="button" data-accion="guardar" disabled>Guardar conciliación</button>
-          </div>
-        </form>
+  static titulo='Conciliación bancaria'; static glifo='⇌'; static necesitaCuenta=true;
+  constructor(contexto){ super(contexto); this.calculo=null; this.importado=null; }
+  plantilla(){
+    const ahora=new Date(); const mes=ahora.getMonth()===0?12:ahora.getMonth(); const anio=ahora.getMonth()===0?ahora.getFullYear()-1:ahora.getFullYear();
+    return `${this.encabezado('Conciliación bancaria','Importa el estado de cuenta y compara automáticamente sus movimientos con el libro de bancos.',`<button type="button" class="secundario" data-accion="imprimir">Imprimir</button>`)}
+      <div class="tarjeta"><h2>1. Cargar estado de cuenta</h2><p>Formatos disponibles en esta primera etapa: CSV y Excel .xlsx.</p>
+        <form class="formulario" data-formulario="importar" style="margin-top:14px"><label>Archivo del banco<input type="file" name="archivo" accept=".csv,.xlsx" required></label><div class="acciones"><button type="submit">Analizar archivo</button></div></form><div data-zona="importacion" style="margin-top:14px"></div>
       </div>
-
+      <div class="tarjeta"><h2>2. Datos de la conciliación</h2><form class="formulario" data-formulario="conciliacion" style="margin-top:14px">
+        <div class="par"><label>Mes<select name="mes">${opcionesMes(mes)}</select></label><label>Año<input name="anio" type="number" min="2000" max="2100" value="${anio}" required></label></div>
+        <div class="par"><label>Saldo según estado de cuenta<input name="saldo_estado_cuenta" type="number" step="0.01" required placeholder="0.00"></label><label>Depósitos en tránsito<input name="depositos_en_transito" type="number" step="0.01" min="0" value="0"></label></div>
+        <div class="par"><label>Notas de débito<input name="notas_debito" type="number" step="0.01" min="0" value="0"></label><label>Notas de crédito<input name="notas_credito" type="number" step="0.01" min="0" value="0"></label></div>
+        <div class="par"><label>Otros ajustes (+/−)<input name="ajustes" type="number" step="0.01" value="0"></label><label>Fecha y lugar<input name="fecha_lugar" placeholder="Guatemala, 31/08/2026"></label></div>
+        <label class="ancho-total">Observaciones<textarea name="observaciones" rows="2"></textarea></label>
+        <div class="acciones"><button type="submit">Calcular conciliación</button><button type="button" data-accion="guardar" disabled>Guardar conciliación</button></div>
+      </form></div>
       <div class="tarjeta" data-zona="resultado" hidden></div>
-
-      <div class="tarjeta">
-        <h2>Conciliaciones guardadas</h2>
-        <div class="lista" data-zona="historial" style="margin-top:14px"></div>
-      </div>`;
+      <div class="tarjeta"><div class="encabezado-vista"><div><h2>Conciliaciones guardadas</h2><p>Ahora cada registro puede abrirse para consultar todos sus movimientos.</p></div></div><div class="lista" data-zona="historial"></div></div>`;
   }
-
-  conectar() {
-    this.alEnviar('[data-formulario="conciliacion"]', (form) => this.calcular(form));
-    this.alHacerClic('[data-accion="guardar"]', () => this.guardar());
-    this.alHacerClic('[data-accion="imprimir"]', () => window.print());
-  }
-
-  datos() {
-    const form = this.$('[data-formulario="conciliacion"]');
-    const datos = datosFormulario(form);
-    return {
-      mes: Number(datos.mes),
-      anio: Number(datos.anio),
-      saldo_estado_cuenta: Number(datos.saldo_estado_cuenta || 0),
-      depositos_en_transito: Number(datos.depositos_en_transito || 0),
-      notas_debito: Number(datos.notas_debito || 0),
-      notas_credito: Number(datos.notas_credito || 0),
-      ajustes: Number(datos.ajustes || 0),
-      fecha_lugar: datos.fecha_lugar || '',
-      observaciones: datos.observaciones || '',
-    };
-  }
-
-  async calcular() {
-    const cuenta = this.estado.cuenta;
-    if (!cuenta) {
-      problema('Selecciona una cuenta antes de conciliar.');
-      return;
-    }
-    try {
-      const resultado = await api.obtener(`/api/conciliacion?${consulta({ cuenta_id: cuenta.id, ...this.datos() })}`);
-      this.calculo = resultado;
-      this.pintarResultado(resultado);
-      this.$('[data-accion="guardar"]').disabled = false;
-    } catch (error) {
-      problema(error.message);
-    }
-  }
-
-  async guardar() {
-    const cuenta = this.estado.cuenta;
-    if (!cuenta || !this.calculo) return;
-    try {
-      const guardada = await api.crear('/api/conciliaciones', { cuenta_id: cuenta.id, ...this.datos() });
-      this.calculo = guardada;
-      this.pintarResultado(guardada);
-      this.$('[data-accion="guardar"]').disabled = true;
-      exito('Conciliación guardada');
-      if (!guardada.cuadrada) pendiente('Quedó guardada con diferencia; revísala con el banco.');
-      await this.cargarHistorial();
-    } catch (error) {
-      problema(error.message);
-    }
-  }
-
-  pintarResultado(resultado) {
-    const r = resultado.reporte;
-    const zona = this.$('[data-zona="resultado"]');
-    zona.hidden = false;
-    zona.innerHTML = `
-      <h2>Resultado de ${escapar(periodo(r.mes, r.anio))}</h2>
-      <div class="aviso ${resultado.cuadrada ? 'logro' : 'pendiente'}">
-        <span aria-hidden="true">${resultado.cuadrada ? '✓' : '▲'}</span>
-        <span>${resultado.cuadrada
-          ? 'Los libros y el banco cuadran al centavo.'
-          : `Diferencia de ${dinero(r.diferencia_con_libros)} entre libros y banco.`}</span>
-      </div>
-      ${(resultado.alertas || []).filter((a) => a.codigo !== 'DIFERENCIA').map((a) => `
-        <div class="aviso pendiente"><span aria-hidden="true">▲</span><span>${escapar(a.mensaje)}</span></div>`).join('')}
-
-      <div class="columnas" style="margin-top:6px">
-        <div>
-          <h3>Según el banco</h3>
-          <div class="metricas" style="margin-top:8px">
-            <div class="metrica"><span>Estado de cuenta</span><strong class="cifra">${dinero(r.saldo_estado_cuenta)}</strong></div>
-            <div class="metrica"><span>(+) Depósitos en tránsito</span><strong class="cifra deposito">${dinero(r.depositos_en_transito)}</strong></div>
-            <div class="metrica"><span>(−) Cheques en circulación</span><strong class="cifra cheque">${dinero(r.cheques_circulacion)}</strong></div>
-            <div class="metrica"><span>Saldo bancario ajustado</span><strong class="cifra">${dinero(r.saldo_conciliado)}</strong></div>
-          </div>
-        </div>
-        <div>
-          <h3>Según los libros</h3>
-          <div class="metricas" style="margin-top:8px">
-            <div class="metrica"><span>Saldo en libros</span><strong class="cifra">${dinero(r.saldo_libros)}</strong></div>
-            <div class="metrica"><span>(+) Notas de crédito</span><strong class="cifra deposito">${dinero(r.notas_credito)}</strong></div>
-            <div class="metrica"><span>(−) Notas de débito</span><strong class="cifra cheque">${dinero(r.notas_debito)}</strong></div>
-            <div class="metrica"><span>Saldo en libros ajustado</span><strong class="cifra">${dinero(r.saldo_libros_ajustado)}</strong></div>
-          </div>
-        </div>
-      </div>
-
-      <h3 style="margin-top:16px">Cheques en circulación al cierre</h3>
-      <div class="tabla-marco" style="margin-top:8px">
-        ${(resultado.cheques_en_circulacion || []).length ? `
-          <table>
-            <thead><tr><th>Fecha</th><th>Cheque</th><th>Beneficiario</th><th>Concepto</th><th class="cifra">Monto</th></tr></thead>
-            <tbody>${resultado.cheques_en_circulacion.map((c) => `
-              <tr>
-                <td>${fecha(c.fecha_operacion)}</td>
-                <td>${escapar(c.numero_documento)}</td>
-                <td>${escapar(c.beneficiario || '')}</td>
-                <td>${escapar(c.concepto)}</td>
-                <td class="cifra cheque">${dinero(c.monto)}</td>
-              </tr>`).join('')}</tbody>
-          </table>` : '<div class="vacio">Ningún cheque quedó pendiente de cobro en el periodo.</div>'}
-      </div>
-      <div class="firmas">
-        <div>Elaboró</div><div>Tesorero</div><div>Vo. Bo.</div><div>Presidente Comisión de Vigilancia</div>
-      </div>`;
-  }
-
-  async cargarHistorial() {
-    const cuenta = this.estado.cuenta;
-    const zona = this.$('[data-zona="historial"]');
-    if (!cuenta) {
-      zona.innerHTML = '<div class="vacio">Selecciona una cuenta para ver su historial.</div>';
-      return;
-    }
-    const items = await api.obtener(`/api/conciliaciones?cuenta_id=${cuenta.id}`);
-    zona.innerHTML = items.length ? items.map((item) => `
-      <div class="elemento">
-        <div>
-          <strong>${escapar(periodo(item.mes, item.anio))}</strong>
-          <small>Conciliado ${dinero(item.saldo_conciliado)} · libros ${dinero(item.saldo_libros_ajustado || item.saldo_libros)}</small>
-          <small>${escapar(item.fecha_lugar || 'Sin fecha y lugar')}${item.usuario ? ` · ${escapar(item.usuario)}` : ''}</small>
-        </div>
-        <span class="etiqueta ${Math.abs(item.diferencia_con_libros) < 0.005 ? 'cobrado' : 'emitido'}">
-          ${Math.abs(item.diferencia_con_libros) < 0.005 ? 'Cuadrada' : `Dif. ${dinero(item.diferencia_con_libros)}`}
-        </span>
-      </div>`).join('') : '<div class="vacio">Esta cuenta todavía no tiene conciliaciones guardadas.</div>';
-  }
-
-  async actualizar() {
-    this.calculo = null;
-    this.$('[data-zona="resultado"]').hidden = true;
-    this.$('[data-accion="guardar"]').disabled = true;
-    await this.cargarHistorial();
-  }
+  conectar(){ this.alEnviar('[data-formulario="conciliacion"]',()=>this.calcular()); this.alEnviar('[data-formulario="importar"]',form=>this.importar(form)); this.alHacerClic('[data-accion="guardar"]',()=>this.guardar()); this.alHacerClic('[data-accion="imprimir"]',()=>window.print()); this.alHacerClic('[data-accion="ver"]',btn=>this.verGuardada(Number(btn.dataset.id))); }
+  datos(){ const d=datosFormulario(this.$('[data-formulario="conciliacion"]')); return {mes:Number(d.mes),anio:Number(d.anio),saldo_estado_cuenta:Number(d.saldo_estado_cuenta||0),depositos_en_transito:Number(d.depositos_en_transito||0),notas_debito:Number(d.notas_debito||0),notas_credito:Number(d.notas_credito||0),ajustes:Number(d.ajustes||0),fecha_lugar:d.fecha_lugar||'',observaciones:d.observaciones||'',movimientos_banco:this.importado?.movimientos_banco||[]}; }
+  async importar(form){ const cuenta=this.estado.cuenta;if(!cuenta){problema('Selecciona una cuenta antes de importar.');return} const archivo=form.archivo.files[0];if(!archivo)return;try{const fd=new FormData();fd.append('archivo',archivo);fd.append('cuenta_id',cuenta.id);const r=await fetch('/api/conciliacion/importar',{method:'POST',body:fd,credentials:'same-origin'});const data=await r.json();if(!r.ok)throw new Error(data.error||'No se pudo analizar el archivo');this.importado=data;const f=this.$('[data-formulario="conciliacion"]');f.mes.value=data.mes;f.anio.value=data.anio;f.saldo_estado_cuenta.value=data.saldo_estado_cuenta||'';f.depositos_en_transito.value=data.depositos_en_transito||0;f.notas_debito.value=data.notas_debito||0;f.notas_credito.value=data.notas_credito||0;this.$('[data-zona="importacion"]').innerHTML=`<div class="aviso logro"><span>✓</span><span><strong>${escapar(data.nombre_archivo)}</strong>: ${data.movimientos_detectados} movimientos detectados; ${data.movimientos_conciliados} coinciden automáticamente y ${data.movimientos_pendientes} quedan pendientes.</span></div>${(data.advertencias||[]).map(x=>`<div class="aviso pendiente">▲ ${escapar(x)}</div>`).join('')}`;exito('Estado de cuenta analizado');}catch(e){problema(e.message)} }
+  async calcular(){const cuenta=this.estado.cuenta;if(!cuenta){problema('Selecciona una cuenta antes de conciliar.');return}try{const r=await api.obtener(`/api/conciliacion?${consulta({cuenta_id:cuenta.id,...this.datos()})}`);this.calculo=r;this.pintarResultado(r);this.$('[data-accion="guardar"]').disabled=false}catch(e){problema(e.message)}}
+  async guardar(){const cuenta=this.estado.cuenta;if(!cuenta||!this.calculo)return;try{const r=await api.crear('/api/conciliaciones',{cuenta_id:cuenta.id,...this.datos()});this.calculo=r;this.pintarResultado(r);this.$('[data-accion="guardar"]').disabled=true;exito('Conciliación guardada');if(!r.cuadrada)pendiente('Quedó guardada con diferencia; revísala con el banco.');await this.cargarHistorial()}catch(e){problema(e.message)}}
+  pintarResultado(resultado){const r=resultado.reporte,z=this.$('[data-zona="resultado"]');z.hidden=false;z.innerHTML=`<h2>Resultado de ${escapar(periodo(r.mes,r.anio))}</h2><div class="aviso ${resultado.cuadrada?'logro':'pendiente'}"><span>${resultado.cuadrada?'✓':'▲'}</span><span>${resultado.cuadrada?'Los libros y el banco cuadran al centavo.':`Diferencia de ${dinero(r.diferencia_con_libros)} entre libros y banco.`}</span></div><div class="columnas"><div><h3>Según el banco</h3><div class="metricas"><div class="metrica"><span>Estado de cuenta</span><strong>${dinero(r.saldo_estado_cuenta)}</strong></div><div class="metrica"><span>(+) Depósitos en tránsito</span><strong>${dinero(r.depositos_en_transito)}</strong></div><div class="metrica"><span>(−) Cheques en circulación</span><strong>${dinero(r.cheques_circulacion)}</strong></div><div class="metrica"><span>Saldo ajustado</span><strong>${dinero(r.saldo_conciliado)}</strong></div></div></div><div><h3>Según los libros</h3><div class="metricas"><div class="metrica"><span>Saldo en libros</span><strong>${dinero(r.saldo_libros)}</strong></div><div class="metrica"><span>(+) Notas de crédito</span><strong>${dinero(r.notas_credito)}</strong></div><div class="metrica"><span>(−) Notas de débito</span><strong>${dinero(r.notas_debito)}</strong></div><div class="metrica"><span>Saldo ajustado</span><strong>${dinero(r.saldo_libros_ajustado)}</strong></div></div></div></div>${this.tablaBanco(r.movimientos_banco||[])}</div>`}
+  tablaBanco(items){return `<h3 style="margin-top:16px">Movimientos del estado de cuenta</h3><div class="tabla-marco"><table><thead><tr><th>Fecha</th><th>Documento</th><th>Descripción</th><th>Estado</th><th class="cifra">Débito</th><th class="cifra">Crédito</th><th class="cifra">Saldo</th></tr></thead><tbody>${items.length?items.map(m=>`<tr><td>${fecha(m.fecha)}</td><td>${escapar(m.numero_documento||'')}</td><td>${escapar(m.descripcion||'')}</td><td>${m.conciliado?'Conciliado':'Pendiente'}</td><td class="cifra">${dinero(m.debito)}</td><td class="cifra">${dinero(m.credito)}</td><td class="cifra">${m.tiene_saldo?dinero(m.saldo):'—'}</td></tr>`).join(''):'<tr><td colspan="7">No hay movimientos importados.</td></tr>'}</tbody></table></div>`}
+  async cargarHistorial(){const cuenta=this.estado.cuenta,z=this.$('[data-zona="historial"]');if(!cuenta){z.innerHTML='<div class="vacio">Selecciona una cuenta para ver su historial.</div>';return}try{const items=await api.obtener(`/api/conciliaciones?cuenta_id=${cuenta.id}`);z.innerHTML=items.length?items.map(i=>`<div class="elemento"><div><strong>${escapar(periodo(i.mes,i.anio))}</strong><small>Conciliado ${dinero(i.saldo_conciliado)} · ${i.movimientos_banco?.length||0} movimientos importados</small><small>${escapar(i.fecha_lugar||'Sin fecha y lugar')}</small></div><div class="controles"><span class="etiqueta ${Math.abs(i.diferencia_con_libros)<0.005?'cobrado':'emitido'}">${Math.abs(i.diferencia_con_libros)<0.005?'Cuadrada':`Dif. ${dinero(i.diferencia_con_libros)}`}</span><button type="button" class="secundario" data-accion="ver" data-id="${i.id}">Ver movimientos</button></div></div>`).join(''):'<div class="vacio">Esta cuenta todavía no tiene conciliaciones guardadas.</div>'}catch(e){problema(e.message)}}
+  async verGuardada(id){try{const r=await api.obtener(`/api/conciliacion/detalle?id=${id}`);this.importado={movimientos_banco:r.movimientos_banco||[]};this.pintarResultado({reporte:r,cheques_en_circulacion:[],alertas:[],cuadrada:Math.abs(r.diferencia_con_libros)<0.005});this.$('[data-zona="resultado"]').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){problema(e.message)}}
+  async actualizar(){this.calculo=null;this.importado=null;this.$('[data-zona="resultado"]').hidden=true;this.$('[data-accion="guardar"]').disabled=true;await this.cargarHistorial()}
 }
