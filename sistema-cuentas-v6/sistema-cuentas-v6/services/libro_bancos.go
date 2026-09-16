@@ -24,24 +24,24 @@ type LibroBancoFila struct {
 }
 
 type LibroBancoMeta struct {
-	CuentaID            int     `json:"cuenta_id"`
-	NumeroCuenta        string  `json:"numero_cuenta"`
-	NombreCuenta        string  `json:"nombre_cuenta"`
-	Banco               string  `json:"banco"`
-	Cooperativa         string  `json:"cooperativa"`
-	Direccion           string  `json:"direccion"`
-	NIT                 string  `json:"nit"`
-	Mes                 int     `json:"mes"`
-	Anio                int     `json:"anio"`
-	TotalDepositos      float64 `json:"total_depositos"`
-	TotalCheques        float64 `json:"total_cheques"`
+	CuentaID             int     `json:"cuenta_id"`
+	NumeroCuenta         string  `json:"numero_cuenta"`
+	NombreCuenta         string  `json:"nombre_cuenta"`
+	Banco                string  `json:"banco"`
+	Cooperativa          string  `json:"cooperativa"`
+	Direccion            string  `json:"direccion"`
+	NIT                  string  `json:"nit"`
+	Mes                  int     `json:"mes"`
+	Anio                 int     `json:"anio"`
+	TotalDepositos       float64 `json:"total_depositos"`
+	TotalCheques         float64 `json:"total_cheques"`
 	ChequesEnCirculacion float64 `json:"cheques_en_circulacion"`
-	SaldoInicialPeriodo float64 `json:"saldo_inicial_periodo"`
-	SaldoFinalPeriodo   float64 `json:"saldo_final_periodo"`
-	TotalRegistros      int     `json:"total_registros"`
-	Pagina              int     `json:"pagina"`
-	TamanoPagina        int     `json:"tamano_pagina"`
-	TotalPaginas        int     `json:"total_paginas"`
+	SaldoInicialPeriodo  float64 `json:"saldo_inicial_periodo"`
+	SaldoFinalPeriodo    float64 `json:"saldo_final_periodo"`
+	TotalRegistros       int     `json:"total_registros"`
+	Pagina               int     `json:"pagina"`
+	TamanoPagina         int     `json:"tamano_pagina"`
+	TotalPaginas         int     `json:"total_paginas"`
 }
 
 type ReporteLibroBancos struct {
@@ -121,7 +121,7 @@ func GenerarLibroBancos(
 		case models.TipoEgreso:
 			fila.Cheque = m.Monto
 			totalCheques = Suma(totalCheques, m.Monto)
-			if m.Estado == models.EstadoEgresoEmitido {
+			if EstaEnCirculacion(m, models.NuevaFecha(anio, time.Month(mes), 1).Time.AddDate(0, 1, -1)) {
 				enCirculacion = Suma(enCirculacion, m.Monto)
 			}
 		}
